@@ -455,13 +455,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spriteOptions:
-  - {fileID: 21300000, guid: 1122db0c9090a9241a8c889eef524fb7, type: 3}
+  - {fileID: 21300000, guid: 513057d1727524e4081b3a207178419c, type: 3}
   - {fileID: 21300000, guid: 3018eb079c8fdca4d9b7e06c98b00558, type: 3}
   - {fileID: 21300000, guid: 7f327fd359db521468518911849d365a, type: 3}
-  - {fileID: 21300000, guid: 513057d1727524e4081b3a207178419c, type: 3}
-  - {fileID: 21300000, guid: 69078c2c0bc7f9841a3181edb8ce7d33, type: 3}
   - {fileID: 21300000, guid: 68505d60f8fab8a45a081d946008bf61, type: 3}
   - {fileID: 21300000, guid: 93ad267a262164a44806c4e3d0af422a, type: 3}
+  - {fileID: 21300000, guid: 1122db0c9090a9241a8c889eef524fb7, type: 3}
+  - {fileID: 21300000, guid: 69078c2c0bc7f9841a3181edb8ce7d33, type: 3}
   spriteRenderers:
   - {fileID: 715003129}
   - {fileID: 2141217442}
@@ -482,9 +482,6 @@ MonoBehaviour:
   maxSpinTime: 6
   currentScore: 0
   scoreText: {fileID: 701891195}
-  fiveInRowScore: 100
-  fourInRowScore: 50
-  threeInRowScore: 25
 --- !u!1 &362056372
 GameObject:
   m_ObjectHideFlags: 0
