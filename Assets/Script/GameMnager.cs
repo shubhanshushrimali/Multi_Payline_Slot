@@ -11,7 +11,6 @@ public class GameMnager : MonoBehaviour
     public float minSpinTime = 4f;
     public float maxSpinTime = 6f;
 
-    public int currentScore = 0;
     public TextMeshProUGUI scoreText;
 
     private Dictionary<Sprite, int> symbolScores;
@@ -19,23 +18,23 @@ public class GameMnager : MonoBehaviour
     void Start()
     {
         InitializeSymbolScores();
-        UpdateScoreText();
+        UpdateScoreText(0); 
     }
 
     private void InitializeSymbolScores()
     {
         symbolScores = new Dictionary<Sprite, int>();
 
+    
         foreach (Sprite symbol in spriteOptions)
         {
-        
             if (symbol.name == "cherry") symbolScores[symbol] = 100;
-            else if (symbol.name == "bar") symbolScores[symbol] = 50;
-            else if (symbol.name == "orange") symbolScores[symbol] = 75;
+            else if (symbol.name == "grapes") symbolScores[symbol] =150;
+            else if (symbol.name == "orange") symbolScores[symbol] = 125;
+            else if (symbol.name == "banana") symbolScores[symbol] = 175;
             else if (symbol.name == "bell") symbolScores[symbol] = 200;
             else if (symbol.name == "seven") symbolScores[symbol] = 500;
-            else if (symbol.name == "graps") symbolScores[symbol] = 500;
-           
+            else if (symbol.name == "bar") symbolScores[symbol] = 700;
         }
     }
 
@@ -81,11 +80,14 @@ public class GameMnager : MonoBehaviour
             }
         }
 
-        CheckRows(slots);
+        int newScore = CheckRows(slots);
+        UpdateScoreText(newScore); 
     }
 
-    private void CheckRows(GameObject[,] slots)
+    private int CheckRows(GameObject[,] slots)
     {
+        int totalScore = 0;
+
         for (int row = 0; row < 3; row++)
         {
             Sprite[] rowSprites = new Sprite[5];
@@ -94,75 +96,62 @@ public class GameMnager : MonoBehaviour
                 rowSprites[col] = slots[row, col].GetComponent<SpriteRenderer>().sprite;
             }
 
-            CheckRow(rowSprites);
+            totalScore += CalculateRowScore(rowSprites);
         }
+
+        return totalScore;
     }
 
-    private void CheckRow(Sprite[] rowSprites)
+    private int CalculateRowScore(Sprite[] rowSprites)
     {
-        int matchCount = 1;
-        Sprite lastSprite = rowSprites[0];
+        Dictionary<Sprite, int> matchCounts = new Dictionary<Sprite, int>();
 
-        for (int i = 1; i < rowSprites.Length; i++)
+        foreach (Sprite sprite in rowSprites)
         {
-            if (rowSprites[i] == lastSprite)
+            if (matchCounts.ContainsKey(sprite))
             {
-                matchCount++;
+                matchCounts[sprite]++;
             }
             else
             {
-                if (matchCount >= 3)
+                matchCounts[sprite] = 1;
+            }
+        }
+
+        int rowScore = 0;
+
+        foreach (var match in matchCounts)
+        {
+            int matchCount = match.Value;
+            Sprite symbol = match.Key;
+
+            if (matchCount >= 3 && symbolScores.TryGetValue(symbol, out int baseScore))
+            {
+                if (matchCount == 4)
                 {
-                    AddScore(lastSprite, matchCount);
+                    rowScore += baseScore * 2;
                 }
-                matchCount = 1;
-                lastSprite = rowSprites[i];
+                else if (matchCount == 5)
+                {
+                    rowScore += baseScore * 3;
+                }
+                else
+                {
+                    rowScore += baseScore;
+                }
             }
         }
 
- 
-        if (matchCount >= 3)
-        {
-            AddScore(lastSprite, matchCount);
-        }
+        return rowScore;
     }
 
-    public void AddScore(Sprite symbol, int matchCount)
+    private void UpdateScoreText(int newScore)
     {
-        if (symbolScores.TryGetValue(symbol, out int baseScore))
-        {
-            int finalScore = baseScore;
-
-            if (matchCount == 4)
-            {
-                finalScore *= 2;
-            }
-            else if (matchCount == 5)
-            {
-                finalScore *= 3;
-            }
-
-            currentScore += finalScore;
-            Debug.Log($"Matched {matchCount} {symbol.name}(s). Score: {finalScore}. Total Score: {currentScore}");
-            UpdateScoreText();
-        }
-        else
-        {
-            Debug.LogWarning("Symbol not found in score list.");
-        }
-    }
-
-    private void UpdateScoreText()
-    {
-        if (scoreText != null)
-        {
-            scoreText.text = "Score: " + currentScore;
-        }
+        scoreText.text = "Score: " + newScore;
     }
 
     public void ResetScore()
     {
-        currentScore = 0;
-        UpdateScoreText();
+        UpdateScoreText(0);  
     }
 }
