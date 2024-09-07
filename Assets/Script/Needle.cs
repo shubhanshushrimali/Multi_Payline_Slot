@@ -12,7 +12,11 @@ public class Needle : MonoBehaviour
     void OnTriggerStay2D(Collider2D col)
     {
         if (spinner.isSpinning)
+        {
+            scoretext.text = "00"; 
             return;
+        }
+           
         scoretext.text = col.gameObject.name;
 
     }
