@@ -12,27 +12,28 @@ public class GameMnager : MonoBehaviour
     public float maxSpinTime = 6f;
 
     public TextMeshProUGUI scoreText;
+    public GameObject bonusButton;  
 
     private Dictionary<Sprite, int> symbolScores;
 
     void Start()
     {
         InitializeSymbolScores();
-        UpdateScoreText(0); 
+        UpdateScoreText(0);
+        bonusButton.SetActive(false);  
     }
 
     private void InitializeSymbolScores()
     {
         symbolScores = new Dictionary<Sprite, int>();
 
-    
         foreach (Sprite symbol in spriteOptions)
         {
             if (symbol.name == "cherry") symbolScores[symbol] = 100;
-            else if (symbol.name == "grapes") symbolScores[symbol] =150;
+            else if (symbol.name == "grapes") symbolScores[symbol] = 150;
             else if (symbol.name == "orange") symbolScores[symbol] = 125;
             else if (symbol.name == "banana") symbolScores[symbol] = 175;
-            else if (symbol.name == "bell") symbolScores[symbol] = 200;
+            else if (symbol.name == "bell") symbolScores[symbol] = 200; 
             else if (symbol.name == "seven") symbolScores[symbol] = 500;
             else if (symbol.name == "bar") symbolScores[symbol] = 700;
         }
@@ -61,12 +62,65 @@ public class GameMnager : MonoBehaviour
         SpriteRenderer spriteRenderer = spriteObject.GetComponent<SpriteRenderer>();
         float elapsedTime = 0f;
 
+        Sprite lastSprite = null;
+
         while (elapsedTime < duration)
         {
-            spriteRenderer.sprite = spriteOptions[Random.Range(0, spriteOptions.Length)];
+            Sprite selectedSprite;
+            float chance = Random.Range(0f, 1f);
+
+            if (lastSprite != null && chance < 0.6f)
+            {
+                selectedSprite = lastSprite;
+            }
+            else
+            {
+                selectedSprite = GetBiasedRandomSprite();
+            }
+
+            spriteRenderer.sprite = selectedSprite;
+            lastSprite = selectedSprite;
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+    }
+
+    private Sprite GetBiasedRandomSprite()
+    {
+        float[] weights = new float[spriteOptions.Length];
+
+        for (int i = 0; i < spriteOptions.Length; i++)
+        {
+            switch (spriteOptions[i].name)
+            {
+                case "cherry": weights[i] = 0.3f; break;
+                case "grapes": weights[i] = 0.25f; break;
+                case "orange": weights[i] = 0.15f; break;
+                case "banana": weights[i] = 0.1f; break;
+                case "bell": weights[i] = 0.2f; break;
+                case "seven": weights[i] = 0.05f; break;
+                case "bar": weights[i] = 0.1f; break;
+            }
+        }
+
+        float totalWeight = 0f;
+        foreach (float weight in weights)
+        {
+            totalWeight += weight;
+        }
+
+        float randomValue = Random.Range(0f, totalWeight);
+        float cumulativeWeight = 0f;
+        for (int i = 0; i < spriteOptions.Length; i++)
+        {
+            cumulativeWeight += weights[i];
+            if (randomValue <= cumulativeWeight)
+            {
+                return spriteOptions[i];
+            }
+        }
+
+        return spriteOptions[0];
     }
 
     private void CalculateScore()
@@ -81,7 +135,7 @@ public class GameMnager : MonoBehaviour
         }
 
         int newScore = CheckRows(slots);
-        UpdateScoreText(newScore); 
+        UpdateScoreText(newScore);
     }
 
     private int CheckRows(GameObject[,] slots)
@@ -119,6 +173,7 @@ public class GameMnager : MonoBehaviour
         }
 
         int rowScore = 0;
+        bool bonusConditionMet = false;  
 
         foreach (var match in matchCounts)
         {
@@ -139,10 +194,27 @@ public class GameMnager : MonoBehaviour
                 {
                     rowScore += baseScore;
                 }
+
+           
+                if (symbol.name == "bell" && matchCount >= 3)
+                {
+                    bonusConditionMet = true;
+                }
             }
         }
 
+    
+        if (bonusConditionMet)
+        {
+            ActivateBonusButton();
+        }
+
         return rowScore;
+    }
+
+    private void ActivateBonusButton()
+    {
+        bonusButton.SetActive(true); 
     }
 
     private void UpdateScoreText(int newScore)
@@ -152,6 +224,11 @@ public class GameMnager : MonoBehaviour
 
     public void ResetScore()
     {
-        UpdateScoreText(0);  
+        UpdateScoreText(0);
+    }
+
+    public void BnousRound()
+    {
+        SceneManager.LoadScene(1); 
     }
 }
